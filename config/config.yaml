@@ -1,0 +1,173 @@
+
+batch_size : 8
+
+VK_CODE_info:
+  up_arrow    : 0x26
+  down_arrow  : 0x28
+  '0'         : 0x60
+  '1'         : 0x61
+  '2'         : 0x62
+  '3'         : 0x63
+  '4'         : 0x64
+  '5'         : 0x65
+  '6'         : 0x66
+  '7'         : 0x67
+  '8'         : 0x68
+  '9'         : 0x69
+  'enter'     : 0x0D
+
+
+tasks_info:
+  '0 9 * * *'     : 'execute_CGS_exe'
+  '9 9 * * *'     : 'gang'
+  '10 9 * * *'    : 'daily'
+  '15 9 * * *'    : '60'
+  '20 9 * * *'    : '30'
+  '25 9 * * *'    : '15'
+  '30 9 * * *'    : '5'
+  '35 9 * * *'    : '1'
+  '40 9 * * *'    : 'email'
+
+  '50 9 * * *'    : '1'
+  '55 9 * * *'    : 'email'
+
+  '0 10 * * *'    : '1'
+  '5 10 * * *'    : 'email'
+  '10 10 * * *'   : '5'
+  '15 10 * * *'   : '1'
+  '20 10 * * *'   : 'email'
+  '25 10 * * *'   : '1'
+  '30 10 * * *'   : 'email'
+  '35 10 * * *'   : '1'
+  '40 10 * * *'   : 'email'
+  '45 10 * * *'   : '5'
+  '50 10 * * *'   : 'gang'
+  '51 10 * * *'   : '1'
+  '55 10 * * *'   : 'email'
+
+  '0 11 * * *'    : '15'
+  '5 11 * * *'    : '1'
+  '10 11 * * *'   : 'email'
+  '15 11 * * *'   : '1'
+  '20 11 * * *'   : 'email'
+
+  '44 12 * * *'   : 'a'
+  '45 12 * * *'   : '30'
+  '20 13 * * *'   : '15'
+  '55 13 * * *'   : '5'
+  '30 14 * * *'   : 'email'
+
+  '35 14 * * *'   : 'gang'
+  '40 14 * * *'   : '15'
+  '45 14 * * *'   : '1'
+  '50 14 * * *'   : 'email'
+  '55 14 * * *'   : '30'
+  '0 15 * * *'    : '1'
+  '5 15 * * *'    : 'email'
+  '10 15 * * *'   : '30'
+  '15 15 * * *'   : '1'
+  '20 15 * * *'   : 'email'
+
+  '28 15 * * *'   : 'a'
+  '30 15 * * *'   : 'daily'
+  '5 16 * * *'    : '60'
+  '40 16 * * *'   : '30'
+  '15 17 * * *'   : 'email'
+
+mail_info:
+  from:
+    address     : 'lucky_clover_stock@163.com'
+    auth_code   : 'PXXKQZVKUGYBRGES'
+    smtp_server : 'smtp.163.com'
+  to:
+    [
+      "1847269030@qq.com",
+      "305590102@qq.com",
+    ]
+
+click_point_info:
+  indent      : (1406, 112)
+  left_menu   : (36, 122)
+
+  "1"         : (277, 90)
+  "5"         : (316, 90)
+  "15"        : (359, 90)
+  "30"        : (402, 90)
+  "60"        : (447, 90)
+  daily       : (492, 90)
+  weekly      : (523, 90)
+
+  zi_xuan_gu  : (395,1008)
+  gang_gu     : (683, 988)
+  a_gu        : (72, 987)
+  gang_gu_tong: (695, 965)
+  a_first     : (141, 136)
+  gang_first  : (135, 114)
+
+screen_shot_info:
+  shot_image_save_path: 'daily_screenshot'
+  shot_num:
+    a    : 4709
+    gang : 715
+
+  resolution : (1920, 1080)
+  RMZ_crop_zone : (802, 107, 1632, 942)
+
+  ocr_zone:
+    code:
+      a: (1719, 85, 1776, 103)
+      gang: (1704, 86, 1747, 103)
+
+    rise:
+      a: (1752, 361, 1805, 380)
+      gang: (1752, 350, 1804, 369)
+
+
+class_indices:
+  0: negative
+  1: positive
+
+
+statistics_info:
+  folder_path: statistics
+  yesterday_prediction_path: 'statistics/yesterday_prediction.xlsx'
+
+  prediction_excel_info:
+    path: 'statistics/统计.xlsx'
+    header: [ '股票代码', '1分钟', '5分钟', '15分钟', '30分钟', '60分钟', '日线', '周线' ,'数字和']
+    time_curve_type_encode:
+      'stock_code': 0
+      '1': 1
+      '5': 2
+      '15': 3
+      '30': 4
+      '60': 5
+      'daily': 6
+      'weekly': 7
+      'code_sum': 8
+
+  winning_excel_info:
+    path: 'statistics/a_winning_calculation.xlsx'
+    header: ['日期','胜率%', '平均涨点%']
+
+test_info:
+  shot_num:
+    a: 4709
+    gang: 20
+  mail_to : "1847269030@qq.com"
+  tasks:
+    [
+      'a',
+      '5',
+#      '60',
+#      '30',
+#      '15',
+#      '5',
+#      '1',
+      'email',
+#      'a',
+#      '15',
+#      '5',
+#      '1',
+#      'email'
+    ]
