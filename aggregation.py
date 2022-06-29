@@ -7,6 +7,8 @@
 
 import csv
 import os
+import shutil
+
 from utils.utils import clear_folder, code_sum
 from openpyxl import load_workbook
 
@@ -88,7 +90,8 @@ class Aggregation(object):
                 stock_code, _ = os.path.splitext(image_name)
 
                 f.write('\t' + stock_code + "\n")
-        clear_folder(image_folder_path)
+
+        shutil.rmtree(image_folder_path)
 
 
 if __name__ == "__main__":
