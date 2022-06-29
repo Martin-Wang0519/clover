@@ -301,6 +301,7 @@ class Window(Ui_MainWindow, QMainWindow):
         p.folder_predict()
         t2 = time()
         t_predict = t2 - t1
+
         self.textBrowser.append("预测用时{}s".format(t_predict))
         self.textBrowser.repaint()
         self.agg.to_txt(self.current_stock_type, self.current_curve_type)
