@@ -250,7 +250,7 @@ class Window(Ui_MainWindow, QMainWindow):
         self.agg.to_excel(self.current_stock_type, excel_path)
         self.textBrowser.append("正在发送邮件...")
 
-        if self.current_stock_type == 'a' and self.current_curve_type == '5':
+        if self.current_stock_type == 'a':
             self.mail.send_email(self.current_stock_type,
                                  [settings.get('statistics_info').get('prediction_excel_info').get('path'),'statistics/a/15.txt'])
         else:

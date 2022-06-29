@@ -42,14 +42,13 @@ class _Email(object):
         stock_chinese_name = "港股" if stock_type == "gang" else "A股"
 
         # 邮件发送和接收人配置
-       
+
         msg = MIMEMultipart()
         msg['From'] = self._format_addr('四叶草 <%s>' % self.from_address)  # 显示的发件人
         # msg['To'] = _format_addr('管理员 <%s>' % to_addr)                # 单个显示的收件人
         msg['To'] = ",".join(self.to_address)  # 多个显示的收件人
         header_str = '今日{}预测'.format(stock_chinese_name)
         msg['Subject'] = Header(header_str, 'utf-8').encode()  # 显示的邮件标题
-
 
         # 邮件正文是MIMEText:
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
