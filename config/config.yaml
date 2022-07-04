@@ -18,8 +18,9 @@ VK_CODE_info:
 
 
 tasks_info:
+
   '0 9 * * *'     : 'execute_CGS_exe'
-  '9 9 * * *'     : 'gang'
+  '8 9 * * *'     : 'gang'
   '10 9 * * *'    : 'daily'
   '15 9 * * *'    : '60'
   '20 9 * * *'    : '30'
@@ -51,28 +52,39 @@ tasks_info:
   '15 11 * * *'   : '1'
   '20 11 * * *'   : 'email'
 
-  '18 13 * * *'   : 'execute_CGS_exe'
-  '19 13 * * *'   : 'a'
+
+  '40 12 * * *'   : 'execute_CGS_exe'
+  '41 12 * * *'   : 'a'
+  '45 12 * * *'   : '60'
   '20 13 * * *'   : '30'
   '55 13 * * *'   : '15'
   '30 14 * * *'   : 'email'
 
-  '35 14 * * *'   : 'gang'
-  '40 14 * * *'   : '15'
-  '45 14 * * *'   : '1'
-  '50 14 * * *'   : 'email'
-  '55 14 * * *'   : '30'
-  '0 15 * * *'    : '1'
-  '5 15 * * *'    : 'email'
-  '10 15 * * *'   : '30'
-  '15 15 * * *'   : '1'
-  '20 15 * * *'   : 'email'
+  '35 14 * * *'   : 'daily'
 
-  '28 15 * * *'   : 'a'
-  '30 15 * * *'   : 'daily'
-  '5 16 * * *'    : '60'
-  '40 16 * * *'   : '30'
-  '15 17 * * *'   : 'email'
+test_info:
+  shot_num:
+    a   : 4709
+    gang: 715
+  mail_to : "1847269030@qq.com"
+  tasks:
+    [
+      'execute_CGS_exe',
+      'gang',
+      'daily',
+      '60',
+#      '30',
+#      '15',
+#      '5',
+#      '1',
+      'email',
+#      'a',
+#      '15',
+#      '5',
+#      '1',
+#      'email'
+    ]
+
 
 mail_info:
   from:
@@ -150,24 +162,3 @@ statistics_info:
     path: 'statistics/a_winning_calculation.xlsx'
     header: ['日期','胜率%', '平均涨点%']
 
-test_info:
-  shot_num:
-    a: 4709
-    gang: 715
-  mail_to : "1847269030@qq.com"
-  tasks:
-    [
-      'gang',
-      'weekly',
-#      '60',
-#      '30',
-#      '15',
-#      '5',
-#      '1',
-      'email',
-#      'a',
-#      '15',
-#      '5',
-#      '1',
-#      'email'
-    ]

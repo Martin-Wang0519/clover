@@ -62,12 +62,15 @@ if __name__ == '__main__':
     # #                   settings.get('statistics_info').get('prediction_excel_info').get('header'),
     # #                   settings.get('statistics_info').get('prediction_excel_info').get('time_curve_type_encode'))
     # # agg.to_excel('gang', 'tongji.xlsx')
-    a = [-1.12, 0, -1.3, 0.79, -1.51, -0.39, 1.11, -2.14, 1.35]
-    b = [x for x in a if x >= 0]
-    print(sum(a) / len(a))
-    print(len(b) / len(a))
+    # a = [-1.12, 0, -1.3, 0.79, -1.51, -0.39, 1.11, -2.14, 1.35]
+    # b = [x for x in a if x >= 0]
+    # print(sum(a) / len(a))
+    # print(len(b) / len(a))
 
     # handle = get_window_handle('海王星')
     # print(handle)
     #
     # win32gui.PostMessage(handle, win32con.WM_CLOSE, 0, 0)
+    a = "a"
+    b = os.path.join(a,'b','c')
+    print(b)

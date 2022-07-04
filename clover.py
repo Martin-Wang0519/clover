@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from openpyxl import load_workbook, Workbook
 
 from utils.utils import get_window_handle, show_window, get_set_OCR_path, \
-    logger, screen_clicked, screen_double_clicked, find_indent_click, keyboard_input, ocr
+    logger, screen_clicked, screen_double_clicked, find_indent_click, keyboard_input, ocr, clear_folder
 from predict import Predict
 from shot_image_process import ShotImageProcess
 from windows.window_ui import Ui_MainWindow
@@ -36,6 +36,7 @@ logging.getLogger('apscheduler').setLevel(logging.ERROR)
 class Window(Ui_MainWindow, QMainWindow):
     def __init__(self, parent):
         super(Window, self).__init__(parent)
+
         self.setupUi(self)
 
         self.pos_dataset_path = 'dataset/stock_data/stock_images/positive'
@@ -60,6 +61,9 @@ class Window(Ui_MainWindow, QMainWindow):
 
         self.shot_num = None
         self.shot_image_save_path = settings.get('screen_shot_info').get('shot_image_save_path')
+        self.stock_type_shot_image_save_path = None
+        self.curve_type_shot_image_save_path = None
+
         self.RMZ_crop_zone = eval(settings.get('screen_shot_info').get('RMZ_crop_zone'))
         self.resolution = eval(settings.get('screen_shot_info').get('resolution'))
         self.grab_zone = (0, 0, self.resolution[0], self.resolution[1])
@@ -68,7 +72,7 @@ class Window(Ui_MainWindow, QMainWindow):
         self.shot_frequency = 3
         self.shotFrequencySpinBox.setValue(self.shot_frequency)
         self.shot_image_queue = Queue()
-        self.shot_image_process_thread_num = 8
+        self.shot_image_process_thread_num = 12
 
         self.confidence = 0.99
 
@@ -102,10 +106,17 @@ class Window(Ui_MainWindow, QMainWindow):
 
         self.CGS_exe_path = r'C:\海王星金融终端-中国银河证券\TdxW.exe'
 
+        self.shot_image_process_threads = []
+
     def execute_CGS_exe(self):
+
         win32api.ShellExecute(0, 'open', self.CGS_exe_path, '', '', 0)
         sleep(5)
         screen_clicked((1267, 624))
+        sleep(5)
+        self.handle = get_window_handle('海王星')
+
+        show_window(self.handle, True)
         sleep(5)
 
     @pyqtSlot()
@@ -167,15 +178,6 @@ class Window(Ui_MainWindow, QMainWindow):
         self.textBrowser.append("训练完毕！")
 
     @pyqtSlot()
-    def on_selectSaveFolder_clicked(self):
-        self.shot_image_save_path = QFileDialog.getExistingDirectory(self, "选择输出文件夹", "daily_screenshot")
-
-        if self.shot_image_save_path is not None and self.shot_image_save_path != "":
-            self.textBrowser.append("选择文件夹成功" + "  " + self.shot_image_save_path)
-        else:
-            self.textBrowser.append("选择文件夹失败！ 请重新选择文件夹")
-
-    @pyqtSlot()
     def on_screenPredictButton_clicked(self):
         self.textBrowser.append('程序已启动')
         self.textBrowser.repaint()
@@ -191,12 +193,8 @@ class Window(Ui_MainWindow, QMainWindow):
     def on_testButton_clicked(self):
 
         self.mail.to_address = settings.get('test_info').get('mail_to')
-        self.handle = get_window_handle('海王星')
-
         if self.user_selection_check() is False:
             return
-
-        show_window(self.handle, True)
 
         for task in settings.get('test_info').get('tasks'):
             if task == 'gang' or task == 'a':
@@ -207,28 +205,30 @@ class Window(Ui_MainWindow, QMainWindow):
                                                      .get('code')
                                                      .get(self.current_stock_type))
                 self.arrow = "up_arrow"
-                self.shot_image_save_path = os.path.join('daily_screenshot', self.current_stock_type)
+                self.shot_image_save_path = os.path.join('daily_screenshot', 'test')
 
-                self.switch_stock_type()
+                self.switch_stock_type(task)
 
             elif task == 'email':
                 self.send_mail()
-            else:
-                self.current_curve_type = task
-                self.screenshot_predict(task)
 
-    def update_parameter_switch_stock_type(self, stock_type):
-        self.current_stock_type = stock_type
+            elif task == 'execute_CGS_exe':
+                self.execute_CGS_exe()
+            else:
+                self.switch_curve_type(task)
+
+    def update_parameter_switch_stock_type(self):
         self.shot_num = settings.get('screen_shot_info').get('shot_num').get(self.current_stock_type)
         self.stock_code_ocr_crop_zone = eval(settings.get('screen_shot_info').get('ocr_zone')
                                              .get('code')
                                              .get(self.current_stock_type))
         self.arrow = "up_arrow"
-        self.shot_image_save_path = os.path.join('daily_screenshot', self.current_stock_type)
+        self.stock_type_shot_image_save_path = os.path.join(self.shot_image_save_path, self.current_stock_type)
 
-        self.switch_stock_type()
+    def switch_stock_type(self, stock_type):
+        self.current_stock_type = stock_type
+        self.update_parameter_switch_stock_type()
 
-    def switch_stock_type(self):
         screen_clicked(settings.get('click_point_info').get('zi_xuan_gu'))
 
         if self.current_stock_type == "gang":
@@ -236,14 +236,72 @@ class Window(Ui_MainWindow, QMainWindow):
             screen_clicked(settings.get('click_point_info').get('gang_gu_tong'))
             sleep(10)
             screen_double_clicked(settings.get('click_point_info').get('gang_first'))
+            sleep(5)
             screen_clicked(settings.get('click_point_info').get('left_menu'))
 
         elif self.current_stock_type == "a":
             screen_clicked(settings.get('click_point_info').get('a_gu'))
             sleep(10)
             screen_double_clicked(settings.get('click_point_info').get('a_first'))
+            sleep(2)
             find_indent_click(eval(settings.get('click_point_info').get('indent')))
+            sleep(5)
             screen_clicked(settings.get('click_point_info').get('left_menu'))
+
+    def switch_curve_type(self, curve_type):
+        self.current_curve_type = curve_type
+        point = eval(settings.get('click_point_info').get(str(self.current_curve_type)))
+        screen_clicked(point)
+        sleep(5)
+
+        self.arrow = "down_arrow" if self.arrow == "up_arrow" else "up_arrow"
+        self.curve_type_shot_image_save_path = os.path.join(self.stock_type_shot_image_save_path,
+                                                            self.current_curve_type)
+
+        if not os.path.exists(self.curve_type_shot_image_save_path):
+            os.makedirs(self.curve_type_shot_image_save_path)
+        else:
+            clear_folder(self.curve_type_shot_image_save_path)
+
+        self.screenshot_predict()
+
+    def screenshot_predict(self):
+        for _ in range(self.shot_image_process_thread_num):
+            t = ShotImageProcess(self.shot_image_queue, self.curve_type_shot_image_save_path,
+                                      self.stock_code_ocr_crop_zone,
+                                      self.RMZ_crop_zone)
+            self.shot_image_process_threads.append(t)
+            t.start()
+
+        sleep_time = 1.0 / self.shot_frequency
+
+        t0 = time()
+
+        for i in range(self.shot_num):
+            grab_image = ImageGrab.grab(self.grab_zone)
+            self.shot_image_queue.put(grab_image)
+            keyboard_input(settings.get('VK_CODE_info').get(self.arrow), sleep_time)
+
+        self.shot_image_queue.join()
+
+        # 检查线程是否执行完毕
+        for t in self.shot_image_process_threads:
+            t.join()
+
+        t1 = time()
+        t_shot = t1 - t0
+
+        self.textBrowser.append("截图用时{}s,共{}张图片".format(t_shot, len(os.listdir(self.curve_type_shot_image_save_path))))
+        self.textBrowser.repaint()
+
+        p = Predict(self.model, self.weight_path, self.curve_type_shot_image_save_path, self.confidence)
+        p.folder_predict()
+        t2 = time()
+        t_predict = t2 - t1
+
+        self.textBrowser.append("预测用时{}s".format(t_predict))
+        self.textBrowser.repaint()
+        self.agg.to_txt(self.current_stock_type, self.current_curve_type, self.curve_type_shot_image_save_path)
 
     def send_mail(self):
         excel_path = settings.get('statistics_info').get('prediction_excel_info').get('path')
@@ -252,59 +310,13 @@ class Window(Ui_MainWindow, QMainWindow):
 
         if self.current_stock_type == 'a':
             self.mail.send_email(self.current_stock_type,
-                                 [settings.get('statistics_info').get('prediction_excel_info').get('path'),'statistics/a/15.txt'])
+                                 [settings.get('statistics_info').get('prediction_excel_info').get('path'),
+                                  'statistics/a/15.txt'])
         else:
             self.mail.send_email(self.current_stock_type,
                                  [settings.get('statistics_info').get('prediction_excel_info').get('path')])
         self.textBrowser.append("邮件发送完毕")
         shutil.copyfile(excel_path, settings.get('statistics_info').get('yesterday_prediction_path'))
-
-    def screenshot_predict(self, curve_type):
-
-        self.current_curve_type = curve_type
-        sleep_time = 1.0 / self.shot_frequency
-
-        point = eval(settings.get('click_point_info').get(str(self.current_curve_type)))
-        screen_clicked(point)
-
-        self.arrow = "down_arrow" if self.arrow == "up_arrow" else "up_arrow"
-        image_save_folder = os.path.join(self.shot_image_save_path, self.current_curve_type)
-        if not os.path.exists(image_save_folder):
-            os.makedirs(image_save_folder)
-
-        for x in range(self.shot_image_process_thread_num):
-            worker = ShotImageProcess(self.shot_image_queue, image_save_folder, self.stock_code_ocr_crop_zone,
-                                      self.RMZ_crop_zone)
-            worker.setDaemon(True)
-            worker.start()
-
-        t0 = time()
-
-        try:
-            for i in range(self.shot_num):
-                grab_image = ImageGrab.grab(self.grab_zone)
-                self.shot_image_queue.put(grab_image)
-                keyboard_input(settings.get('VK_CODE_info').get(self.arrow), sleep_time)
-        except MemoryError:
-            message = traceback.format_exc()
-            self.logger.error(message)
-            exit(0)
-
-        self.shot_image_queue.join()
-        t1 = time()
-        t_shot = t1 - t0
-
-        self.textBrowser.append("截图用时{}s,共{}张图片".format(t_shot, len(os.listdir(image_save_folder))))
-        self.textBrowser.repaint()
-
-        p = Predict(self.model, self.weight_path, image_save_folder, self.confidence)
-        p.folder_predict()
-        t2 = time()
-        t_predict = t2 - t1
-
-        self.textBrowser.append("预测用时{}s".format(t_predict))
-        self.textBrowser.repaint()
-        self.agg.to_txt(self.current_stock_type, self.current_curve_type)
 
     def on_aButton_clicked(self):
         self.current_stock_type = 'a'
@@ -324,19 +336,19 @@ class Window(Ui_MainWindow, QMainWindow):
 
     def generate_schedule(self):
         for corn, task in settings.get('tasks_info').items():
-            if task == 'gang' or task == 'a':
-                self.scheduler.add_job(self.update_parameter_switch_stock_type,
-                                       CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'),
-                                       args=[task])
+            if task == 'execute_CGS_exe':
+                self.scheduler.add_job(self.execute_CGS_exe,
+                                       CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'))
             elif task == 'email':
                 self.scheduler.add_job(self.send_mail,
                                        CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'))
 
-            elif task == 'execute_CGS_exe':
-                self.scheduler.add_job(self.execute_CGS_exe,
-                                       CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'))
+            elif task == 'gang' or task == 'a':
+                self.scheduler.add_job(self.switch_stock_type,
+                                       CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'),
+                                       args=[task])
             else:
-                self.scheduler.add_job(self.screenshot_predict,
+                self.scheduler.add_job(self.switch_curve_type,
                                        CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'),
                                        args=[task])
 
@@ -351,7 +363,7 @@ class Window(Ui_MainWindow, QMainWindow):
         show_window(self.handle, True)
 
         self.current_stock_type = 'a'
-        self.switch_stock_type()
+        self.switch_stock_type(self.current_stock_type)
 
         yesterday_prediction_excel_path = settings.get('statistics_info').get('yesterday_prediction_path')
 

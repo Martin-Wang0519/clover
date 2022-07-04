@@ -80,18 +80,15 @@ class Aggregation(object):
         work_book.save(excel_path)
         work_book.close()
 
-    def to_txt(self, stock_type, curve_type):
-        self.aggregation_folder = os.path.join(self.aggregation_file_save_folder,stock_type)
-        image_folder = os.path.join(self.shot_image_save_folder, stock_type)
-        txt_path = os.path.join(self.aggregation_folder, "{}.txt".format(curve_type))
-        image_folder_path = os.path.join(image_folder, curve_type)
+    def to_txt(self, stock_type, curve_type, image_folder_path):
+        txt_path = os.path.join(self.aggregation_file_save_folder, stock_type, "{}.txt".format(curve_type))
         with open(txt_path, 'w') as f:
             for image_name in os.listdir(image_folder_path):
                 stock_code, _ = os.path.splitext(image_name)
 
                 f.write('\t' + stock_code + "\n")
 
-        shutil.rmtree(image_folder_path)
+        clear_folder(image_folder_path)
 
 
 if __name__ == "__main__":
