@@ -71,6 +71,5 @@ if __name__ == '__main__':
     # print(handle)
     #
     # win32gui.PostMessage(handle, win32con.WM_CLOSE, 0, 0)
-    a = "a"
-    b = os.path.join(a,'b','c')
-    print(b)
+    point = eval(settings.get('click_point_info').get('CGS_task_bar'))
+    screen_clicked(point)

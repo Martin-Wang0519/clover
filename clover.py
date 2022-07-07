@@ -6,7 +6,6 @@ from datetime import date, timedelta
 from queue import Queue
 from time import time, sleep
 
-import win32api
 from PIL import ImageGrab
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
@@ -80,7 +79,7 @@ class Window(Ui_MainWindow, QMainWindow):
         self.model = myModel(classes_num=2).to(self.device)
 
         ##################################
-        self.task_queue = Queue()
+        self.task_queue = Queue(1000)
         self.scheduler = BlockingScheduler(timezone="Asia/Shanghai")
         self.arrow = "up_arrow"
         self.handle = None
@@ -104,16 +103,17 @@ class Window(Ui_MainWindow, QMainWindow):
 
         self.logger = logger()
 
-        self.CGS_exe_path = r'C:\海王星金融终端-中国银河证券\TdxW.exe'
-
         self.shot_image_process_threads = []
 
-    def execute_CGS_exe(self):
+        self.test_mode = False
 
-        win32api.ShellExecute(0, 'open', self.CGS_exe_path, '', '', 0)
+    def execute_CGS_exe(self):
+        point = eval(settings.get('click_point_info').get('CGS_task_bar'))
+        screen_clicked(point)
         sleep(5)
         screen_clicked((1267, 624))
         sleep(5)
+
         self.handle = get_window_handle('海王星')
 
         show_window(self.handle, True)
@@ -191,24 +191,14 @@ class Window(Ui_MainWindow, QMainWindow):
 
     @pyqtSlot()
     def on_testButton_clicked(self):
-
+        self.test_mode = True
         self.mail.to_address = settings.get('test_info').get('mail_to')
         if self.user_selection_check() is False:
             return
 
         for task in settings.get('test_info').get('tasks'):
             if task == 'gang' or task == 'a':
-                self.current_stock_type = task
-                self.shot_num = settings.get('test_info').get('shot_num').get(self.current_stock_type)
-                self.stock_code_ocr_crop_zone = eval(settings.get('screen_shot_info')
-                                                     .get('ocr_zone')
-                                                     .get('code')
-                                                     .get(self.current_stock_type))
-                self.arrow = "up_arrow"
-                self.shot_image_save_path = os.path.join('daily_screenshot', 'test')
-
                 self.switch_stock_type(task)
-
             elif task == 'email':
                 self.send_mail()
 
@@ -218,12 +208,18 @@ class Window(Ui_MainWindow, QMainWindow):
                 self.switch_curve_type(task)
 
     def update_parameter_switch_stock_type(self):
-        self.shot_num = settings.get('screen_shot_info').get('shot_num').get(self.current_stock_type)
+        if self.test_mode is True:
+            self.shot_num = settings.get('test_info').get('shot_num').get(self.current_stock_type)
+            self.stock_type_shot_image_save_path = os.path.join(self.shot_image_save_path, 'test',
+                                                                self.current_stock_type)
+        else:
+            self.shot_num = settings.get('screen_shot_info').get('shot_num').get(self.current_stock_type)
+            self.stock_type_shot_image_save_path = os.path.join(self.shot_image_save_path, self.current_stock_type)
+
         self.stock_code_ocr_crop_zone = eval(settings.get('screen_shot_info').get('ocr_zone')
                                              .get('code')
                                              .get(self.current_stock_type))
         self.arrow = "up_arrow"
-        self.stock_type_shot_image_save_path = os.path.join(self.shot_image_save_path, self.current_stock_type)
 
     def switch_stock_type(self, stock_type):
         self.current_stock_type = stock_type
@@ -263,33 +259,39 @@ class Window(Ui_MainWindow, QMainWindow):
         else:
             clear_folder(self.curve_type_shot_image_save_path)
 
+        # for t in self.shot_image_process_threads:
+        #     t.set_save_path(self.curve_type_shot_image_save_path)
+
         self.screenshot_predict()
 
     def screenshot_predict(self):
+        sleep_time = 1.0 / self.shot_frequency
+        global t
         for _ in range(self.shot_image_process_thread_num):
             t = ShotImageProcess(self.shot_image_queue, self.curve_type_shot_image_save_path,
-                                      self.stock_code_ocr_crop_zone,
-                                      self.RMZ_crop_zone)
+                                 self.stock_code_ocr_crop_zone,
+                                 self.RMZ_crop_zone)
+            t.setDaemon(False)
             self.shot_image_process_threads.append(t)
             t.start()
 
-        sleep_time = 1.0 / self.shot_frequency
-
         t0 = time()
-
-        for i in range(self.shot_num):
+        for _ in range(self.shot_num):
             grab_image = ImageGrab.grab(self.grab_zone)
             self.shot_image_queue.put(grab_image)
             keyboard_input(settings.get('VK_CODE_info').get(self.arrow), sleep_time)
 
+        print('截图后队列大小'+str(self.shot_image_queue.qsize()))
         self.shot_image_queue.join()
-
-        # 检查线程是否执行完毕
+        print('结束后队列大小'+str(self.shot_image_queue.qsize()))
         for t in self.shot_image_process_threads:
-            t.join()
+            t.stop()
+        print('线程数'+str(t.get_enumerate()))
 
         t1 = time()
         t_shot = t1 - t0
+
+        print("截图用时{}s,共{}张图片".format(t_shot, len(os.listdir(self.curve_type_shot_image_save_path))))
 
         self.textBrowser.append("截图用时{}s,共{}张图片".format(t_shot, len(os.listdir(self.curve_type_shot_image_save_path))))
         self.textBrowser.repaint()

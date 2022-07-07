@@ -1,6 +1,7 @@
 
 batch_size : 8
 
+
 VK_CODE_info:
   up_arrow    : 0x26
   down_arrow  : 0x28
@@ -37,6 +38,7 @@ tasks_info:
   '10 10 * * *'   : '5'
   '15 10 * * *'   : '1'
   '20 10 * * *'   : 'email'
+
   '25 10 * * *'   : '1'
   '30 10 * * *'   : 'email'
   '35 10 * * *'   : '1'
@@ -53,14 +55,14 @@ tasks_info:
   '20 11 * * *'   : 'email'
 
 
-  '40 12 * * *'   : 'execute_CGS_exe'
-  '41 12 * * *'   : 'a'
+  '43 12 * * *'   : 'execute_CGS_exe'
+  '44 12 * * *'   : 'a'
   '45 12 * * *'   : '60'
   '20 13 * * *'   : '30'
   '55 13 * * *'   : '15'
   '30 14 * * *'   : 'email'
-
   '35 14 * * *'   : 'daily'
+  '20 15 * * *'   : '60'
 
 test_info:
   shot_num:
@@ -71,13 +73,13 @@ test_info:
     [
       'execute_CGS_exe',
       'gang',
-      'daily',
-      '60',
-#      '30',
+      'weekly',
+#      'a',
+#      'weekly',
 #      '15',
 #      '5',
 #      '1',
-      'email',
+#      'email',
 #      'a',
 #      '15',
 #      '5',
@@ -95,6 +97,7 @@ mail_info:
     [
       "1847269030@qq.com",
       "305590102@qq.com",
+      '1294595552@qq.com'
     ]
 
 click_point_info:
@@ -115,6 +118,8 @@ click_point_info:
   gang_gu_tong: (695, 965)
   a_first     : (141, 136)
   gang_first  : (135, 114)
+
+  CGS_task_bar: (125, 1060)
 
 screen_shot_info:
   shot_image_save_path: 'daily_screenshot'
