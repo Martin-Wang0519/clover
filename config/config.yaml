@@ -30,8 +30,8 @@ tasks_info:
   '35 9 * * *'    : '1'
   '40 9 * * *'    : 'email'
 
-  '50 9 * * *'    : '1'
-  '55 9 * * *'    : 'email'
+  '45 9 * * *'    : '1'
+  '50 9 * * *'    : 'email'
 
   '0 10 * * *'    : '1'
   '5 10 * * *'    : 'email'
@@ -44,8 +44,7 @@ tasks_info:
   '35 10 * * *'   : '1'
   '40 10 * * *'   : 'email'
   '45 10 * * *'   : '5'
-  '50 10 * * *'   : 'gang'
-  '51 10 * * *'   : '1'
+  '50 10 * * *'   : '1'
   '55 10 * * *'   : 'email'
 
   '0 11 * * *'    : '15'
@@ -55,14 +54,15 @@ tasks_info:
   '20 11 * * *'   : 'email'
 
 
-  '43 12 * * *'   : 'execute_CGS_exe'
-  '44 12 * * *'   : 'a'
-  '45 12 * * *'   : '60'
+  '19 13 * * *'   : 'a'
   '20 13 * * *'   : '30'
   '55 13 * * *'   : '15'
   '30 14 * * *'   : 'email'
   '35 14 * * *'   : 'daily'
-  '20 15 * * *'   : '60'
+  '10 15 * * *'   : '60'
+
+  '20 15 * * *'   : 'quit_CGS_exe'
+
 
 test_info:
   shot_num:
@@ -72,8 +72,9 @@ test_info:
   tasks:
     [
       'execute_CGS_exe',
-      'gang',
-      'weekly',
+      'quit_CGS_exe',
+#      'daily',
+#      '60'
 #      'a',
 #      'weekly',
 #      '15',
@@ -120,6 +121,10 @@ click_point_info:
   gang_first  : (135, 114)
 
   CGS_task_bar: (125, 1060)
+
+  CGS_close: (1903, 6)
+  CGS_quit_button: (866, 590)
+
 
 screen_shot_info:
   shot_image_save_path: 'daily_screenshot'

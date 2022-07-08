@@ -107,8 +107,17 @@ class Window(Ui_MainWindow, QMainWindow):
 
         self.test_mode = False
 
+    def quit_CGS_exe(self):
+        point = eval(settings.get('click_point_info').get('CGS_close'))
+        screen_clicked(point)
+        sleep(2)
+
+        point = eval(settings.get('click_point_info').get('CGS_quit_button'))
+        screen_clicked(point)
+
     def execute_CGS_exe(self):
         point = eval(settings.get('click_point_info').get('CGS_task_bar'))
+
         screen_clicked(point)
         sleep(5)
         screen_clicked((1267, 624))
@@ -204,6 +213,10 @@ class Window(Ui_MainWindow, QMainWindow):
 
             elif task == 'execute_CGS_exe':
                 self.execute_CGS_exe()
+
+            elif task == 'quit_CGS_exe':
+                self.quit_CGS_exe()
+
             else:
                 self.switch_curve_type(task)
 
@@ -341,6 +354,11 @@ class Window(Ui_MainWindow, QMainWindow):
             if task == 'execute_CGS_exe':
                 self.scheduler.add_job(self.execute_CGS_exe,
                                        CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'))
+
+            elif task == 'quit_CGS_exe':
+                self.scheduler.add_job(self.quit_CGS_exe,
+                                       CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'))
+
             elif task == 'email':
                 self.scheduler.add_job(self.send_mail,
                                        CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'))
@@ -349,6 +367,8 @@ class Window(Ui_MainWindow, QMainWindow):
                 self.scheduler.add_job(self.switch_stock_type,
                                        CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'),
                                        args=[task])
+
+
             else:
                 self.scheduler.add_job(self.switch_curve_type,
                                        CronTrigger.from_crontab(corn, timezone='Asia/Shanghai'),
